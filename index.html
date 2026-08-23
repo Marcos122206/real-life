@@ -38,63 +38,46 @@
 </head>
 <body class="bg-[#0a0a0b] text-zinc-100 min-h-screen flex flex-col items-center relative selection:bg-violet-500/30">
 
-    <!-- Glow background -->
     <div class="fixed inset-0 pointer-events-none overflow-hidden">
         <div class="absolute -top-[300px] left-1/2 -translate-x-1/2 w-[900px] h-[600px] bg-gradient-to-br from-violet-600/20 via-indigo-600/20 to-fuchsia-600/20 blur-[120px] rounded-full"></div>
-        <div class="absolute top-[40%] -left-[200px] w-[500px] h-[500px] bg-indigo-600/10 blur-[100px] rounded-full"></div>
     </div>
 
-    <!-- Header -->
     <header class="w-full max-w-[1100px] sticky top-0 z-50 px-4 pt-4">
         <div class="glass w-full bg-[#121214]/80 border border-white/[0.06] rounded-[20px] h-[64px] flex justify-between items-center px-5 shadow-[0_10px_40px_rgba(0,0,0,0.5)]">
             <div class="flex items-center gap-3">
                 <div class="h-9 w-9 rounded-full bg-white text-black grid place-items-center font-extrabold text-[14px]">R</div>
                 <h1 class="text-[17px] font-extrabold tracking-tight">Real Life <span class="opacity-60 font-medium">🌍</span></h1>
-                <span class="hidden md:inline-flex ml-3 text-[11px] tracking-[0.12em] uppercase font-bold text-zinc-500 bg-white/[0.06] border border-white/[0.06] px-2.5 py-1 rounded-full">BETA</span>
             </div>
             <div class="flex items-center gap-3">
                 <div class="flex items-center gap-2.5 bg-[#1c1c1f] border border-white/[0.06] rounded-full pl-3 pr-1.5 py-1">
                     <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span class="text-[11px] uppercase tracking-wide font-semibold text-zinc-400">Próximo drop em</span>
+                    <span class="text-[11px] uppercase tracking-wide font-semibold text-zinc-400">Drop em</span>
                     <div id="timer" class="mono text-[13px] font-bold bg-white text-black px-2.5 py-1 rounded-full min-w-[58px] text-center">10:00</div>
                 </div>
-                <div class="h-9 w-9 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 grid place-items-center font-bold text-[12px]">MH</div>
+                <div class="flex items-center gap-2">
+                    <span id="usuario-nome" class="text-[13px] font-medium text-zinc-300 hidden md:block">@usuario</span>
+                    <div id="usuario-avatar" class="h-9 w-9 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 grid place-items-center font-bold text-[12px]">U</div>
+                    <button onclick="sair()" class="h-9 w-9 rounded-full bg-white/[0.06] border border-white/[0.08] grid place-items-center text-zinc-400 hover:text-white transition">⎋</button>
+                </div>
             </div>
         </div>
     </header>
 
     <div class="w-full max-w-[1100px] grid grid-cols-1 lg:grid-cols-[240px_1fr_300px] gap-4 px-4 mt-6 pb-28 lg:pb-10 relative z-10">
 
-        <!-- Sidebar Esq -->
         <aside class="hidden lg:flex flex-col gap-4 sticky top-[88px] h-fit">
             <nav class="bg-[#121214] border border-white/[0.06] rounded-[20px] p-2">
                 <button class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white text-black font-semibold text-[14px]"><span>⌂</span> Feed Real</button>
-                <button class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-zinc-500 hover:text-zinc-200 hover:bg-white/[0.04] text-[14px]">◍ Explorar</button>
-                <button class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-zinc-500 hover:text-zinc-200 hover:bg-white/[0.04] text-[14px]">♡ Atividade</button>
-                <button class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-zinc-500 hover:text-zinc-200 hover:bg-white/[0.04] text-[14px]">◎ Perfil</button>
+                <button onclick="document.getElementById('pesquisa-usuarios').focus()" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-zinc-500 hover:text-zinc-200 hover:bg-white/[0.04] text-[14px]">◍ Buscar pessoas</button>
+                <button onclick="sair()" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-zinc-500 hover:text-red-300 hover:bg-red-500/10 text-[14px]">⎋ Sair</button>
             </nav>
             <div class="bg-[#121214] border border-white/[0.06] rounded-[20px] p-4">
-                <p class="text-[12px] leading-relaxed text-zinc-400">O <b class="text-zinc-200">Real Life</b> te obriga a postar nos próximos 10 minutos. Sem filtro, sem edição. Só o agora.</p>
+                <p class="text-[12px] leading-relaxed text-zinc-400">Logado como <b id="usuario-detalhe" class="text-zinc-200">@usuario</b>. Seu momento expira em 10 min.</p>
             </div>
         </aside>
 
-        <!-- Centro -->
         <main class="w-full flex flex-col gap-4 min-w-0">
 
-            <!-- Stories -->
-            <div class="bg-[#121214] border border-white/[0.06] rounded-[24px] p-4">
-                <div class="flex gap-4 overflow-x-auto no-scrollbar">
-                    <div class="flex flex-col items-center gap-1.5 shrink-0">
-                        <div class="h-[58px] w-[58px] rounded-full bg-white grid place-items-center text-black font-bold">+</div>
-                        <span class="text-[11px] text-zinc-400">Você</span>
-                    </div>
-                    <div class="flex flex-col items-center gap-1.5 shrink-0"><div class="h-[58px] w-[58px] rounded-full p-[2.5px] bg-gradient-to-br from-violet-500 to-fuchsia-500"><div class="h-full w-full rounded-full bg-[#121214] grid place-items-center text-[11px] font-bold">SL</div></div><span class="text-[11px] text-zinc-400">sofia</span></div>
-                    <div class="flex flex-col items-center gap-1.5 shrink-0"><div class="h-[58px] w-[58px] rounded-full p-[2.5px] bg-gradient-to-br from-emerald-400 to-cyan-400"><div class="h-full w-full rounded-full bg-[#121214] grid place-items-center text-[11px] font-bold">MK</div></div><span class="text-[11px] text-zinc-400">marco</span></div>
-                    <div class="flex flex-col items-center gap-1.5 shrink-0"><div class="h-[58px] w-[58px] rounded-full p-[2.5px] bg-gradient-to-br from-orange-400 to-pink-500"><div class="h-full w-full rounded-full bg-[#121214] grid place-items-center text-[11px] font-bold">AR</div></div><span class="text-[11px] text-zinc-400">ana</span></div>
-                </div>
-            </div>
-
-            <!-- Busca -->
             <div class="bg-[#121214] border border-white/[0.06] rounded-[20px] p-3 shadow-[0_8px_30px_rgba(0,0,0,0.2)]">
                 <div class="relative">
                     <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500 text-[14px]">⌕</span>
@@ -103,19 +86,17 @@
                 <div id="lista-resultados-busca" class="mt-2 flex flex-col gap-1"></div>
             </div>
 
-            <!-- Criar -->
             <div class="bg-[#121214] border border-white/[0.06] rounded-[24px] p-5">
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="font-bold text-[13px] tracking-[0.08em] uppercase text-zinc-300 flex items-center gap-2"><span class="h-5 w-5 rounded-full bg-white text-black grid place-items-center text-[10px]">✦</span> Criar Momento</h2>
-                    <span class="text-[11px] text-zinc-500">Imagem obrigatória • máx 10MB</span>
+                    <span class="text-[11px] text-zinc-500">Apenas foto real</span>
                 </div>
                 <form id="form-post" onsubmit="enviarPost(event)" class="flex flex-col gap-3">
-                    <label id="drop-zone" for="imagem-input" class="group relative flex flex-col items-center justify-center gap-2 w-full min-h-[130px] bg-[#0f0f11] border border-dashed border-white/10 rounded-[16px] hover:border-violet-500/40 hover:bg-violet-500/[0.03] transition cursor-pointer overflow-hidden">
+                    <label id="drop-zone" for="imagem-input" class="group relative flex flex-col items-center justify-center gap-2 w-full min-h-[130px] bg-[#0f0f10] border border-dashed border-white/10 rounded-[16px] hover:border-violet-500/40 hover:bg-violet-500/[0.03] transition cursor-pointer overflow-hidden">
                         <div id="preview-container" class="hidden absolute inset-0"><img id="preview-img" class="w-full h-full object-cover"><button type="button" onclick="limparImagem(event)" class="absolute top-2 right-2 h-7 w-7 rounded-full bg-black/70 backdrop-blur text-white grid place-items-center">✕</button></div>
                         <div id="drop-placeholder" class="flex flex-col items-center gap-2 py-6">
                             <div class="h-10 w-10 rounded-full bg-white/[0.06] border border-white/[0.08] grid place-items-center">🖼️</div>
                             <p class="text-[13px] text-zinc-300 font-medium">Arraste sua foto real ou <span class="text-white underline">clique aqui</span></p>
-                            <p class="text-[11px] text-zinc-500">PNG, JPG até 10MB</p>
                         </div>
                         <input type="file" id="imagem-input" accept="image/*" required class="hidden">
                     </label>
@@ -126,30 +107,40 @@
                 </form>
             </div>
 
-            <!-- Feed -->
-            <div id="feed" class="flex flex-col gap-4"></div>
+            <div id="feed" class="flex flex-col gap-4">
+                <div class="bg-[#121214] border border-white/[0.06] rounded-[24px] p-12 text-center animate-pulse">
+                    <p class="text-zinc-500 text-[13px]">Carregando momentos reais...</p>
+                </div>
+            </div>
 
         </main>
 
-        <!-- Sidebar Dir -->
         <aside class="hidden lg:flex flex-col gap-4 sticky top-[88px] h-fit">
             <div class="bg-[#121214] border border-white/[0.06] rounded-[20px] p-4">
-                <div class="flex items-center justify-between mb-3">
-                    <h3 class="text-[11px] font-bold uppercase tracking-[0.1em] text-zinc-500">Sugestões</h3>
-                    <button class="text-[11px] font-semibold text-zinc-300">Ver tudo</button>
-                </div>
+                <h3 class="text-[11px] font-bold uppercase tracking-[0.1em] text-zinc-500 mb-3">Pessoas reais</h3>
                 <div id="sugestoes-lateral" class="flex flex-col gap-3"></div>
-            </div>
-            <div class="bg-[#121214] border border-white/[0.06] rounded-[20px] p-4">
-                <p class="text-[11px] leading-relaxed text-zinc-500">© 2025 Real Life 🌍 • Feito pra quem cansou de feed fake.</p>
             </div>
         </aside>
     </div>
 
     <script>
         const socket = typeof io !== 'undefined' ? io() : { on: ()=>{} };
-        let usuarioLogado = localStorage.getItem('usuarioLogado') || prompt('Digite seu nome de usuário:') || 'Convidado';
-        localStorage.setItem('usuarioLogado', usuarioLogado);
+        let usuarioLogado = localStorage.getItem('usuarioLogado');
+        
+        // PROTEÇÃO: Se não logado, manda pro login
+        if(!usuarioLogado){
+            window.location.href = '/login.html';
+        }
+
+        function sair(){
+            localStorage.removeItem('usuarioLogado');
+            window.location.href = '/login.html';
+        }
+
+        // Atualiza UI com usuário
+        document.getElementById('usuario-nome').innerText = '@' + usuarioLogado;
+        document.getElementById('usuario-detalhe').innerText = '@' + usuarioLogado;
+        document.getElementById('usuario-avatar').innerText = usuarioLogado.slice(0,2).toUpperCase();
 
         // Preview imagem
         const inputImagem = document.getElementById('imagem-input');
@@ -174,7 +165,6 @@
         dropZone.addEventListener('dragleave',()=>{dropZone.classList.remove('border-violet-500/60')});
         dropZone.addEventListener('drop',(e)=>{e.preventDefault(); dropZone.classList.remove('border-violet-500/60'); const file=e.dataTransfer.files[0]; if(file && file.type.startsWith('image/')){inputImagem.files=e.dataTransfer.files; inputImagem.dispatchEvent(new Event('change'))}});
 
-        // Temporizador
         function iniciarTemporizador() {
             const elementoTimer = document.getElementById('timer');
             if (!elementoTimer) return;
@@ -201,16 +191,9 @@
                 const data = await res.json();
                 renderizarFeed(data.posts);
                 configurarBuscaUsuarios(data.perfis || {});
-                renderizarSugestoes(data.perfis || {});
+                renderizarSugestoes(data.perfis || {}, data.seguindo || {});
             } catch (e) {
-                console.error('Erro ao carregar dados:', e);
-                const feed = document.getElementById('feed');
-                feed.innerHTML = '<div class="bg-[#121214] border border-white/[0.06] rounded-[20px] p-8 text-center"><p class="text-zinc-400 text-[14px]">Sem conexão com servidor. Mostrando preview.</p></div>';
-                // mock para preview se não tiver servidor
-                renderizarFeed([
-                    {id:1, usuario:'sofia.lens', data:'agora', imagem:'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800', legenda:'luz da tarde no estúdio. sem filtro, sem pose.', curtidas:['ana','marco']},
-                    {id:2, usuario:'marco.ui', data:'18m', imagem:'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800', legenda:'setup minimalista e café quente.', curtidas:[]}
-                ]);
+                document.getElementById('feed').innerHTML = '<div class="bg-[#121214] border border-white/[0.06] rounded-[24px] p-12 text-center"><p class="text-zinc-400 text-[14px]">Erro ao conectar no servidor. Verifique se o server.js está rodando.</p></div>';
             }
         }
 
@@ -219,10 +202,11 @@
             if (!feed) return;
             feed.innerHTML = '';
             if (!posts || posts.length === 0) {
-                feed.innerHTML = '<div class="bg-[#121214] border border-white/[0.06] rounded-[24px] p-12 text-center"><div class="h-12 w-12 rounded-full bg-white/[0.06] grid place-items-center mx-auto mb-3">🪐</div><p class="text-zinc-300 font-medium text-[14px]">Nenhum momento real ainda</p><p class="text-zinc-500 text-[12px] mt-1">Seja o primeiro a postar nos próximos 10 minutos</p></div>';
+                feed.innerHTML = '<div class="bg-[#121214] border border-white/[0.06] rounded-[24px] p-12 text-center"><div class="h-12 w-12 rounded-full bg-white/[0.06] grid place-items-center mx-auto mb-3">🪐</div><p class="text-zinc-300 font-medium text-[14px]">Nenhum momento real ainda</p><p class="text-zinc-500 text-[12px] mt-1">Seja o primeiro a postar agora</p></div>';
                 return;
             }
             posts.forEach(post => {
+                const curtiu = post.curtidas?.includes(usuarioLogado);
                 const div = document.createElement('div');
                 div.className = 'bg-[#121214] border border-white/[0.06] rounded-[24px] overflow-hidden group hover:border-white/[0.10] transition';
                 div.innerHTML = `
@@ -230,8 +214,8 @@
                         <div class="flex items-center gap-3">
                             <div class="h-9 w-9 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 grid place-items-center text-[11px] font-bold text-white">${(post.usuario||'U').slice(0,2).toUpperCase()}</div>
                             <div class="leading-tight">
-                                <div class="flex items-center gap-1.5"><span class="font-semibold text-[13.5px]">@${post.usuario}</span><span class="h-3.5 w-3.5 rounded-full bg-white text-black grid place-items-center text-[9px]">✓</span></div>
-                                <span class="text-[11px] text-zinc-500">${post.data || 'agora'} • real life</span>
+                                <div class="flex items-center gap-1.5"><span class="font-semibold text-[13.5px]">@${post.usuario}</span></div>
+                                <span class="text-[11px] text-zinc-500">${post.data || 'agora'}</span>
                             </div>
                         </div>
                         <button class="h-8 w-8 rounded-full bg-white/[0.04] border border-white/[0.06] grid place-items-center text-zinc-400">⋯</button>
@@ -240,16 +224,13 @@
                         <img src="${post.imagem}" class="w-full object-cover max-h-[560px] group-hover:scale-[1.01] transition duration-[1.2s]" loading="lazy" />
                     </div>
                     <div class="p-4">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-1">
-                                <button onclick="curtirPost(${post.id})" class="h-9 w-9 rounded-full bg-white/[0.05] border border-white/[0.06] grid place-items-center hover:bg-white/[0.08] transition active:scale-90">❤️</button>
-                                <button class="h-9 w-9 rounded-full bg-white/[0.05] border border-white/[0.06] grid place-items-center hover:bg-white/[0.08] transition">💬</button>
-                                <button class="h-9 w-9 rounded-full bg-white/[0.05] border border-white/[0.06] grid place-items-center hover:bg-white/[0.08] transition">↗</button>
-                            </div>
-                            <button class="h-9 w-9 rounded-full bg-white/[0.05] border border-white/[0.06] grid place-items-center">◫</button>
+                        <div class="flex items-center gap-1">
+                            <button onclick="curtirPost(${post.id})" class="h-9 w-9 rounded-full border grid place-items-center transition active:scale-90 ${curtiu ? 'bg-red-500/10 border-red-500/20 text-red-400' : 'bg-white/[0.05] border-white/[0.06] hover:bg-white/[0.08]'}">❤️</button>
+                            <button class="h-9 w-9 rounded-full bg-white/[0.05] border border-white/[0.06] grid place-items-center">💬</button>
+                            <button class="h-9 w-9 rounded-full bg-white/[0.05] border border-white/[0.06] grid place-items-center">↗</button>
                         </div>
                         <div class="mt-3 text-[13.5px] leading-[1.5]"><span class="font-semibold">@${post.usuario}</span> <span class="text-zinc-300">${post.legenda || ''}</span></div>
-                        <div class="mt-2 flex items-center gap-3 text-[12px] text-zinc-500"><span class="font-semibold text-zinc-300">${post.curtidas ? post.curtidas.length : 0} curtidas</span><span>•</span><span>${post.comentarios || 0} comentários</span></div>
+                        <div class="mt-2 text-[12px] text-zinc-500"><span class="font-semibold text-zinc-300">${post.curtidas ? post.curtidas.length : 0} curtidas</span></div>
                     </div>
                 `;
                 feed.appendChild(div);
@@ -271,7 +252,7 @@
                 const res = await fetch('/posts', { method: 'POST', body: formData });
                 if (res.ok) { inputLegenda.value = ''; limparImagem({preventDefault:()=>{}, stopPropagation:()=>{}}); carregarDados(); }
                 else alert('Erro ao enviar post.');
-            }catch{ alert('Sem servidor conectado - post só no preview'); }
+            }catch{ alert('Erro de conexão'); }
             btn.innerHTML = '<span>Publicar momento real</span> <span class="text-[16px]">↗</span>'; btn.disabled=false;
         }
 
@@ -292,15 +273,21 @@
                 });
             };
         }
-        function renderizarSugestoes(perfis){
+        function renderizarSugestoes(perfis, seguindo){
             const el = document.getElementById('sugestoes-lateral'); if(!el) return; el.innerHTML='';
-            Object.keys(perfis).slice(0,4).forEach(u=>{
-                const d=document.createElement('div'); d.className='flex items-center justify-between'; d.innerHTML=`<div class="flex items-center gap-2.5"><div class="h-8 w-8 rounded-full bg-white/[0.08] grid place-items-center text-[11px] font-bold">${u.slice(0,2).toUpperCase()}</div><div class="leading-tight"><div class="text-[13px] font-medium">@${u}</div><div class="text-[11px] text-zinc-500">sugestão</div></div></div><button onclick="seguirUsuario('${u}')" class="text-[12px] font-bold text-white hover:text-zinc-300">Seguir</button>`; el.appendChild(d);
+            const lista = Object.keys(perfis).filter(u=>u!==usuarioLogado).slice(0,5);
+            if(lista.length===0){ el.innerHTML='<p class="text-[12px] text-zinc-600">Nenhum usuário ainda. Convide amigos!</p>'; return;}
+            lista.forEach(u=>{
+                const estaSeguindo = seguindo[usuarioLogado]?.includes(u);
+                const d=document.createElement('div'); d.className='flex items-center justify-between'; d.innerHTML=`<div class="flex items-center gap-2.5"><div class="h-8 w-8 rounded-full bg-white/[0.08] grid place-items-center text-[11px] font-bold">${u.slice(0,2).toUpperCase()}</div><div class="leading-tight"><div class="text-[13px] font-medium">@${u}</div><div class="text-[11px] text-zinc-500">${estaSeguindo ? 'seguindo' : 'sugestão'}</div></div></div><button onclick="seguirUsuario('${u}')" class="text-[12px] font-bold ${estaSeguindo ? 'text-zinc-500' : 'text-white hover:text-zinc-300'}">${estaSeguindo ? 'Seguindo' : 'Seguir'}</button>`; el.appendChild(d);
             })
         }
         async function seguirUsuario(alvo) {
-            try{ await fetch('/api/seguir', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ usuario: usuarioLogado, alvo }) }); }catch{}
-            alert(`Você agora interage com @${alvo}`);
+            try{ 
+                const res = await fetch('/api/seguir', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ usuario: usuarioLogado, alvo }) }); 
+                const data = await res.json();
+                carregarDados();
+            }catch{}
         }
         async function curtirPost(id) {
             try{ await fetch(`/posts/${id}/curtir`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ usuario: usuarioLogado }) }); carregarDados(); }catch{}
@@ -310,6 +297,8 @@
         window.onload = () => { iniciarTemporizador(); carregarDados(); };
     </script>
 <script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body>
+</html>
+ument.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body>
 </html>
 skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.group:hover .group-hover\:rotate-12{--tw-rotate:12deg}.group:hover .group-hover\:scale-105{--tw-scale-x:1.05;--tw-scale-y:1.05}.group:hover .group-hover\:scale-105,.group:hover .group-hover\:scale-\[1\.03\]{transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.group:hover .group-hover\:scale-\[1\.03\]{--tw-scale-x:1.03;--tw-scale-y:1.03}.group:hover .group-hover\:text-zinc-200{--tw-text-opacity:1;color:rgb(228 228 231/var(--tw-text-opacity,1))}.group:hover .group-hover\:opacity-100{opacity:1}@supports (backdrop-filter:var(--tw )){.supports-\[backdrop-filter\]\:bg-\[\#0f0f10\]\/70{background-color:rgba(15,15,16,.7)}}@media (min-width:640px){.sm\:block{display:block}.sm\:inline{display:inline}}@media (min-width:768px){.md\:mt-0{margin-top:0}.md\:flex{display:flex}.md\:p-5{padding:1.25rem}.md\:px-0{padding-left:0;padding-right:0}.md\:px-6{padding-left:1.5rem;padding-right:1.5rem}.md\:py-6{padding-top:1.5rem;padding-bottom:1.5rem}}@media (min-width:1024px){.lg\:bottom-6{bottom:1.5rem}.lg\:flex{display:flex}.lg\:grid{display:grid}.lg\:hidden{display:none}.lg\:grid-cols-\[260px_minmax\(0\2c 1fr\)_320px\]{grid-template-columns:260px minmax(0,1fr) 320px}.lg\:pb-0{padding-bottom:0}}</style>
 </head>
