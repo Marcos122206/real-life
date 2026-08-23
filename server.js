@@ -180,33 +180,3 @@ io.on('connection', (socket) => {
 server.listen(PORT, '0.0.0.0', () => {
     console.log(`Real Life rodando na porta ${PORT}`);
 });
-  res.json({
-        posts: [...db.posts].reverse(),
-        ranking,
-        perfis: db.perfis,
-        seguindo: db.seguindo
-    });
-});
-
-app.post('/api/perfil', (req, res) => {
-    const { usuario, bio, corTema } = req.body;
-    const db = lerDados();
-    if (!db.perfis[usuario]) db.perfis[usuario] = {};
-    if (bio !== undefined) db.perfis[usuario].bio = bio;
-    if (corTema) db.perfis[usuario].corTema = corTema;
-    salvarDados(db);
-    res.json({ mensagem: 'Perfil atualizado!' });
-});
-
-// Chat
-io.on('connection', (socket) => {
-    socket.on('enviar-mensagem', (data) => {
-        io.emit('receber-mensagem', data);
-    });
-});
-
-server.listen(PORT, '0.0.0.0', () => {
-    console.log(`Real Life v2.0 rodando na porta ${PORT}`);
-});
-
-});
