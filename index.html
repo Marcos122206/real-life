@@ -4,238 +4,202 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Real Life</title>
-    <style>
-        :root {
-            --bg-color: #090d16;
-            --card-bg: #161e2e;
-            --primary: #6366f1;
-            --primary-hover: #4f46e5;
-            --accent: #ec4899;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --border: #1e293b;
+    <!-- Tailwind CSS para estilização rápida e moderna -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Socket.io do cliente -->
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center">
+
+    <!-- Cabeçalho -->
+    <header class="w-full bg-white shadow p-4 flex justify-between items-center max-w-xl">
+        <h1 class="text-xl font-bold text-indigo-600">Real Life 🌍</h1>
+        <div id="timer" class="text-sm font-semibold bg-indigo-50 text-indigo-600 px-3 py-1 rounded-full">
+            00:00:00
+        </div>
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <main class="w-full max-w-xl p-4 flex flex-col gap-4">
+
+        <!-- Caixa de Pesquisa de Usuários para Seguir -->
+        <div class="bg-white p-4 rounded-xl shadow-md">
+            <input type="text" id="pesquisa-usuarios" placeholder="🔍 Pesquisar usuários para seguir..." class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <div id="lista-resultados-busca" class="mt-2 flex flex-col gap-1"></div>
+        </div>
+
+        <!-- Formulário de Postagem -->
+        <div class="bg-white p-4 rounded-xl shadow-md">
+            <h2 class="font-semibold text-gray-700 mb-2">Criar Post</h2>
+            <form id="form-post" onsubmit="enviarPost(event)" class="flex flex-col gap-3">
+                <input type="file" id="imagem-input" accept="image/*" required class="text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                <input type="text" id="legenda-input" placeholder="Escreva uma legenda..." class="p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <button type="submit" class="bg-indigo-600 text-white py-2 rounded-lg font-semibold hover:bg-indigo-700 transition">Postar</button>
+            </form>
+        </div>
+
+        <!-- Feed de Posts -->
+        <div id="feed" class="flex flex-col gap-4">
+            <!-- Os posts aparecem aqui dinamicamente -->
+        </div>
+
+    </main>
+
+    <!-- Script de Integração -->
+    <script>
+        const socket = io();
+        let usuarioLogado = localStorage.getItem('usuarioLogado') || prompt('Digite seu nome de usuário:') || 'Convidado';
+        localStorage.setItem('usuarioLogado', usuarioLogado);
+
+        // --- TEMPORIZADOR ---
+        function iniciarTemporizador() {
+            const elementoTimer = document.getElementById('timer');
+            if (!elementoTimer) return;
+
+            function atualizar() {
+                const agora = new Date();
+                const proximo = new Date();
+                proximo.setHours(24, 0, 0, 0);
+                const diff = proximo - agora;
+
+                const horas = Math.floor((diff / (1000 * 60 * 60)) % 24);
+                const minutos = Math.floor((diff / 1000 / 60) % 60);
+                const segundos = Math.floor((diff / 1000) % 60);
+
+                elementoTimer.innerText = `${horas.toString().padStart(2, '0')}:${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`;
+            }
+            setInterval(atualizar, 1000);
+            atualizar();
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        // --- CARREGAR DADOS ---
+        async function carregarDados() {
+            try {
+                const res = await fetch('/dados');
+                const data = await res.json();
+                renderizarFeed(data.posts);
+                configurarBuscaUsuarios(data.perfis || {});
+            } catch (e) {
+                console.error('Erro ao carregar dados:', e);
+            }
         }
 
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            display: flex;
-            justify-content: center;
-            padding-bottom: 75px;
+        // --- RENDERIZAR FEED ---
+        function renderizarFeed(posts) {
+            const feed = document.getElementById('feed');
+            if (!feed) return;
+            feed.innerHTML = '';
+
+            if (!posts || posts.length === 0) {
+                feed.innerHTML = '<p class="text-center text-gray-400 py-4">Nenhum post no feed ainda.</p>';
+                return;
+            }
+
+            posts.forEach(post => {
+                const div = document.createElement('div');
+                div.className = 'bg-white rounded-xl shadow-md p-4';
+                div.innerHTML = `
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="font-bold text-indigo-600">@${post.usuario}</span>
+                        <span class="text-xs text-gray-400">${post.data}</span>
+                    </div>
+                    <img src="${post.imagem}" class="rounded-lg w-full object-cover max-h-96 mb-3" />
+                    <p class="text-gray-700 mb-2">${post.legenda}</p>
+                    <div class="flex items-center gap-4 text-sm text-gray-500">
+                        <button onclick="curtirPost(${post.id})" class="flex items-center gap-1 hover:text-red-500 transition">
+                            ❤️ <span>${post.curtidas ? post.curtidas.length : 0}</span>
+                        </button>
+                    </div>
+                `;
+                feed.appendChild(div);
+            });
         }
 
-        .container {
-            width: 100%;
-            max-width: 480px;
-            padding: 15px;
+        // --- ENVIAR POST ---
+        async function enviarPost(e) {
+            e.preventDefault();
+            const inputImagem = document.getElementById('imagem-input');
+            const inputLegenda = document.getElementById('legenda-input');
+
+            if (!inputImagem.files[0]) {
+                alert('Selecione uma imagem!');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('usuario', usuarioLogado);
+            formData.append('imagem', inputImagem.files[0]);
+            formData.append('legenda', inputLegenda.value);
+
+            const res = await fetch('/posts', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (res.ok) {
+                inputLegenda.value = '';
+                inputImagem.value = '';
+                carregarDados();
+            } else {
+                alert('Erro ao enviar post.');
+            }
         }
 
-        header {
-            text-align: center;
-            margin-bottom: 15px;
-            padding-top: 10px;
+        // --- BUSCA DE USUÁRIOS ---
+        function configurarBuscaUsuarios(perfis) {
+            const inputBusca = document.getElementById('pesquisa-usuarios');
+            const listaResultados = document.getElementById('lista-resultados-busca');
+            if (!inputBusca || !listaResultados) return;
+
+            inputBusca.oninput = (e) => {
+                const termo = e.target.value.toLowerCase();
+                listaResultados.innerHTML = '';
+                if (!termo) return;
+
+                const encontrados = Object.keys(perfis).filter(u => u.toLowerCase().includes(termo) && u !== usuarioLogado);
+
+                encontrados.forEach(usuario => {
+                    const item = document.createElement('div');
+                    item.className = 'flex justify-between items-center p-2 hover:bg-gray-50 rounded border-b';
+                    item.innerHTML = `
+                        <span class="font-semibold text-sm">@${usuario}</span>
+                        <button onclick="seguirUsuario('${usuario}')" class="bg-indigo-600 text-white px-3 py-1 rounded text-xs hover:bg-indigo-700">Seguir</button>
+                    `;
+                    listaResultados.appendChild(item);
+                });
+            };
         }
 
-        header h1 {
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-size: 1.8rem;
-            font-weight: 800;
+        async function seguirUsuario(alvo) {
+            await fetch('/api/seguir', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ usuario: usuarioLogado, alvo })
+            });
+            alert(`Você agora interage com @${alvo}`);
         }
 
-        #toast-container {
-            position: fixed;
-            top: 15px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 9999;
-            width: 90%;
-            max-width: 400px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            pointer-events: none;
+        async function curtirPost(id) {
+            await fetch(`/posts/${id}/curtir`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ usuario: usuarioLogado })
+            });
+            carregarDados();
         }
 
-        .toast {
-            background: var(--card-bg);
-            border-left: 4px solid var(--primary);
-            color: var(--text-main);
-            padding: 12px 16px;
-            border-radius: 8px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
-            font-size: 0.9rem;
-            animation: slideDown 0.3s ease, fadeOut 0.3s ease 2.7s forwards;
-            pointer-events: auto;
-            border: 1px solid var(--border);
-        }
+        // Socket.io tempo real
+        socket.on('novo-post', () => carregarDados());
+        socket.on('atualizar-posts', () => carregarDados());
 
-        @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        @keyframes fadeOut { to { opacity: 0; transform: translateY(-10px); } }
-
-        #auth-screen {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            height: 75vh;
-        }
-
-        .auth-card {
-            background: var(--card-bg);
-            padding: 25px;
-            border-radius: 16px;
-            border: 1px solid var(--border);
-        }
-
-        .auth-switch {
-            text-align: center;
-            margin-top: 15px;
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            cursor: pointer;
-        }
-
-        .auth-switch span { color: var(--primary); font-weight: bold; }
-
-        #main-app { display: none; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; animation: fadeIn 0.2s ease; }
-
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background: rgba(15, 23, 42, 0.95);
-            backdrop-filter: blur(10px);
-            border-top: 1px solid var(--border);
-            display: flex;
-            justify-content: space-around;
-            padding: 12px 0;
-            z-index: 1000;
-        }
-
-        .nav-btn {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            font-size: 0.8rem;
-            cursor: pointer;
-            font-weight: 600;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .nav-btn.active { color: var(--primary); }
-
-        .card {
-            background: var(--card-bg);
-            padding: 16px;
-            border-radius: 14px;
-            margin-bottom: 16px;
-            border: 1px solid var(--border);
-        }
-
-        input, textarea {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 12px;
-            background: #090d16;
-            border: 1px solid var(--border);
-            color: var(--text-main);
-            border-radius: 10px;
-            outline: none;
-        }
-
-        button.main-btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 600;
-            width: 100%;
-            transition: background 0.2s;
-        }
-
-        .btn-seguir {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            cursor: pointer;
-            font-weight: 600;
-        }
-
-        .btn-seguir.seguindo {
-            background: transparent;
-            border: 1px solid var(--border);
-            color: var(--text-muted);
-        }
-
-        .feed-toggle {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 10px;
-        }
-
-        .feed-tab-btn {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            font-weight: bold;
-            font-size: 0.9rem;
-            cursor: pointer;
-        }
-
-        .feed-tab-btn.active {
-            color: var(--primary);
-            border-bottom: 2px solid var(--primary);
-        }
-
-        .camera-box { text-align: center; }
-        #video { width: 100%; max-height: 360px; border-radius: 12px; background: #000; object-fit: cover; margin-bottom: 12px; }
-        .timer-alert { background: rgba(99, 102, 241, 0.1); border: 1px solid var(--primary); padding: 12px; border-radius: 10px; margin-bottom: 15px; font-size: 0.9rem; text-align: center; }
-
-        .post-item { background: var(--card-bg); border-radius: 14px; margin-bottom: 20px; border: 1px solid var(--border); overflow: hidden; }
-        .post-header { padding: 12px 16px; font-weight: 700; color: var(--text-main); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
-        .post-img { width: 100%; max-height: 420px; object-fit: cover; display: block; }
-        .post-body { padding: 12px 16px; }
-        .post-actions { display: flex; gap: 15px; margin-bottom: 10px; }
-        .action-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; gap: 6px; font-weight: 600; }
-        .action-btn.liked { color: #ef4444; }
-
-        .comments-section { border-top: 1px solid var(--border); padding-top: 10px; margin-top: 10px; max-height: 120px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
-        .comment { font-size: 0.85rem; background: #090d16; padding: 6px 10px; border-radius: 6px; }
-        .comment-input-box { display: flex; gap: 8px; margin-top: 8px; }
-        .comment-input-box input { margin-bottom: 0; padding: 8px; font-size: 0.85rem; }
-        .comment-input-box button { width: auto; padding: 8px 14px; font-size: 0.85rem; border-radius: 8px; }
-
-        .chat-box { height: 300px; overflow-y: auto; background: #090d16; border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px; }
-        .chat-msg { background: var(--card-bg); padding: 8px 12px; border-radius: 8px; font-size: 0.9rem; }
-        .ranking-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #090d16; border-radius: 10px; margin-bottom: 8px; border: 1px solid var(--border); }
-
-        .profile-header { text-align: center; padding: 15px 0; }
-        .profile-avatar { width: 70px; height: 70px; background: var(--primary); border-radius: 50%; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; font-weight: bold; }
-        .memories-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 15px; }
-        .memory-img { width: 100%; height: 100px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border); }
+        window.onload = () => {
+            iniciarTemporizador();
+            carregarDados();
+        };
+    </script>
+</body>
+</html>
+: 1px solid var(--border); }
 
         .theme-selector { display: flex; gap: 10px; justify-content: center; margin: 15px 0; }
         .theme-btn { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #fff; cursor: pointer; }

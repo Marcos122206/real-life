@@ -53,13 +53,10 @@ function salvarDados(dados) {
 app.post('/api/registro', async (req, res) => {
     try {
         const { usuario, senha } = req.body;
-        if (!usuario || !senha) {
-            return res.status(400).json({ erro: 'Preencha todos os campos.' });
-        }
+        if (!usuario || !senha) return res.status(400).json({ erro: 'Preencha todos os campos.' });
         const db = lerDados();
-        if (db.contas[usuario]) {
-            return res.status(400).json({ erro: 'Usuário já existe.' });
-        }
+        if (db.contas[usuario]) return res.status(400).json({ erro: 'Usuário já existe.' });
+        
         db.contas[usuario] = await bcrypt.hash(senha, 10);
         db.usuarios[usuario] = 0;
         db.perfis[usuario] = { bio: 'Vivendo no Real Life 🌍', corTema: '#6366f1' };
@@ -75,13 +72,11 @@ app.post('/api/login', async (req, res) => {
     try {
         const { usuario, senha } = req.body;
         const db = lerDados();
-        if (!db.contas[usuario]) {
-            return res.status(400).json({ erro: 'Usuário ou senha inválidos.' });
-        }
+        if (!db.contas[usuario]) return res.status(400).json({ erro: 'Usuário ou senha inválidos.' });
+        
         const senhaValida = await bcrypt.compare(senha, db.contas[usuario]);
-        if (!senhaValida) {
-            return res.status(400).json({ erro: 'Usuário ou senha inválidos.' });
-        }
+        if (!senhaValida) return res.status(400).json({ erro: 'Usuário ou senha inválidos.' });
+        
         res.json({ mensagem: 'Login bem-sucedido!', usuario });
     } catch (e) {
         res.status(500).json({ erro: 'Erro interno no servidor.' });
@@ -169,6 +164,22 @@ app.post('/api/perfil', (req, res) => {
     if (corTema) db.perfis[usuario].corTema = corTema;
     salvarDados(db);
     res.json({ mensagem: 'Perfil atualizado!' });
+});
+
+// Seguir usuário
+app.post('/api/seguir', (req, res) => {
+    const { usuario, alvo } = req.body;
+    const db = lerDados();
+    if (!db.seguindo[usuario]) db.seguindo[usuario] = [];
+    
+    const index = db.seguindo[usuario].indexOf(alvo);
+    if (index > -1) {
+        db.seguindo[usuario].splice(index, 1);
+    } else {
+        db.seguindo[usuario].push(alvo);
+    }
+    salvarDados(db);
+    res.json({ seguindo: db.seguindo[usuario] });
 });
 
 io.on('connection', (socket) => {
