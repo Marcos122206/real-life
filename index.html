@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real Life</title>
+    <style>
+        :root {
+            --bg-color: #090d16;
+            --card-bg: #161e2e;
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --accent: #ec4899;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #1e293b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            padding-bottom: 75px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            padding: 15px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 15px;
+            padding-top: 10px;
+        }
+
+        header h1 {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 1.8rem;
+            font-weight: 800;
+        }
+
+        #toast-container {
+            position: fixed;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            width: 90%;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+
+        .toast {
+            background: var(--card-bg);
+            border-left: 4px solid var(--primary);
+            color: var(--text-main);
+            padding: 12px 16px;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+            font-size: 0.9rem;
+            animation: slideDown 0.3s ease, fadeOut 0.3s ease 2.7s forwards;
+            pointer-events: auto;
+            border: 1px solid var(--border);
+        }
+
+        @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes fadeOut { to { opacity: 0; transform: translateY(-10px); } }
+
+        #auth-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            height: 75vh;
+        }
+
+        .auth-card {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+        }
+
+        .auth-switch {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        .auth-switch span { color: var(--primary); font-weight: bold; }
+
+        #main-app { display: none; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.2s ease; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0;
+            z-index: 1000;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .nav-btn.active { color: var(--primary); }
+
+        .card {
+            background: var(--card-bg);
+            padding: 16px;
+            border-radius: 14px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border);
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 12px;
+            background: #090d16;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            border-radius: 10px;
+            outline: none;
+        }
+
+        button.main-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            width: 100%;
+            transition: background 0.2s;
+        }
+
+        .btn-seguir {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-seguir.seguindo {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+        }
+
+        .feed-toggle {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+        }
+
+        .feed-tab-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-weight: bold;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .feed-tab-btn.active {
+            color: var(--primary);
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .camera-box { text-align: center; }
+        #video { width: 100%; max-height: 360px; border-radius: 12px; background: #000; object-fit: cover; margin-bottom: 12px; }
+        .timer-alert { background: rgba(99, 102, 241, 0.1); border: 1px solid var(--primary); padding: 12px; border-radius: 10px; margin-bottom: 15px; font-size: 0.9rem; text-align: center; }
+
+        .post-item { background: var(--card-bg); border-radius: 14px; margin-bottom: 20px; border: 1px solid var(--border); overflow: hidden; }
+        .post-header { padding: 12px 16px; font-weight: 700; color: var(--text-main); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
+        .post-img { width: 100%; max-height: 420px; object-fit: cover; display: block; }
+        .post-body { padding: 12px 16px; }
+        .post-actions { display: flex; gap: 15px; margin-bottom: 10px; }
+        .action-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; gap: 6px; font-weight: 600; }
+        .action-btn.liked { color: #ef4444; }
+
+        .comments-section { border-top: 1px solid var(--border); padding-top: 10px; margin-top: 10px; max-height: 120px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+        .comment { font-size: 0.85rem; background: #090d16; padding: 6px 10px; border-radius: 6px; }
+        .comment-input-box { display: flex; gap: 8px; margin-top: 8px; }
+        .comment-input-box input { margin-bottom: 0; padding: 8px; font-size: 0.85rem; }
+        .comment-input-box button { width: auto; padding: 8px 14px; font-size: 0.85rem; border-radius: 8px; }
+
+        .chat-box { height: 300px; overflow-y: auto; background: #090d16; border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px; }
+        .chat-msg { background: var(--card-bg); padding: 8px 12px; border-radius: 8px; font-size: 0.9rem; }
+        .ranking-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #090d16; border-radius: 10px; margin-bottom: 8px; border: 1px solid var(--border); }
+
+        .profile-header { text-align: center; padding: 15px 0; }
+        .profile-avatar { width: 70px; height: 70px; background: var(--primary); border-radius: 50%; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; font-weight: bold; }
+        .memories-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 15px; }
+        .memory-img { width: 100%; height: 100px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border); }
+
+        .theme-selector { display: flex; gap: 10px; justify-content: center; margin: 15px 0; }
+        .theme-btn { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #fff; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div id="toast-container"></div>
+
+    <div class="container">
+        <header>
+            <h1>Real Life</h1>
+        </header>
+
+        <!-- LOGIN -->
+        <div id="auth-screen">
+            <div class="auth-card">
+                <h2 id="auth-title" style="margin-bottom: 15px; text-align: center;">Entrar no Real Life</h2>
+                <input type="text" id="auth-user" placeholder="Seu usuário">
+                <input type="password" id="auth-pass" placeholder="Sua senha">
+                <button class="main-btn" onclick="executarAuth()" id="auth-btn">Entrar</button>
+                <div class="auth-switch" onclick="alternarModoAuth()">
+                    Não tem conta? <span id="switch-text">Cadastre-se</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- MAIN APP -->
+        <div id="main-app">
+            <!-- ABA 1: FEED -->
+            <div id="tab-feed" class="tab-content active">
+                <div class="feed-toggle">
+                    <button class="feed-tab-btn active" onclick="filtrarFeed('global', this)">Global</button>
+                    <button class="feed-tab-btn" onclick="filtrarFeed('seguindo', this)">Seguindo</button>
+                </div>
+                <div id="feed-container">
+                    <p style="text-align: center; color: var(--text-muted);">Carregando...</p>
+                </div>
+            </div>
+
+            <!-- ABA 2: CÂMERA -->
+            <div id="tab-camera" class="tab-content">
+                <div class="card camera-box">
+                    <h3>Momento Real Life</h3>
+                    <div id="timer-box" class="timer-alert">
+                        Próxima foto liberada em: <span id="countdown">--:--</span>
+                    </div>
+                    
+                    <video id="video" autoplay playsinline></video>
+                    <canvas id="canvas" style="display:none;"></canvas>
+
+                    <input type="text" id="cam-legenda" placeholder="O que você está fazendo agora?">
+                    <button id="btn-tirar" class="main-btn" onclick="tirarFoto()" disabled>Aguarde o tempo...</button>
+                </div>
+            </div>
+
+            <!-- ABA 3: RANKING -->
+            <div id="tab-ranking" class="tab-content">
+                <h2>Ranking de Atividade</h2>
+                <div id="ranking-list" style="margin-top: 15px;"></div>
+            </div>
+
+            <!-- ABA 4: CHAT -->
+            <div id="tab-chat" class="tab-content">
+                <h2>Chat Global</h2>
+                <div class="card" style="margin-top: 15px;">
+                    <div id="chat-messages" class="chat-box"></div>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" id="chat-text" placeholder="Sua mensagem..." style="margin-bottom:0;">
+                        <button class="main-btn" onclick="enviarMensagem()" style="width: auto;">Enviar</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ABA 5: PERFIL -->
+            <div id="tab-profile" class="tab-content">
+                <div class="card">
+                    <div class="profile-header">
+                        <div class="profile-avatar" id="profile-initial">U</div>
+                        <h2 id="profile-username">@usuario</h2>
+                    </div>
+
+                    <div style="text-align: center; margin-bottom: 10px; font-size: 0.85rem; color: var(--text-muted);">Cor do App:</div>
+                    <div class="theme-selector">
+                        <div class="theme-btn" style="background: #6366f1;" onclick="mudarCorTema('#6366f1')"></div>
+                        <div class="theme-btn" style="background: #ec4899;" onclick="mudarCorTema('#ec4899')"></div>
+                        <div class="theme-btn" style="background: #10b981;" onclick="mudarCorTema('#10b981')"></div>
+                        <div class="theme-btn" style="background: #0ea5e9;" onclick="mudarCorTema('#0ea5e9')"></div>
+                    </div>
+
+                    <textarea id="profile-bio" placeholder="Escreva sua biografia..."></textarea>
+                    <button class="main-btn" onclick="salvarPerfil()">Salvar Perfil</button>
+                    
+                    <h3 style="margin-top: 20px; font-size: 1rem;">Minhas Memórias 📸</h3>
+                    <div id="memories-container" class="memories-grid"></div>
+
+                    <button onclick="logout()" style="background:none; border:none; color:#ef4444; width:100%; margin-top:25px; cursor:pointer; font-weight:600;">Sair da Conta</button>
+                </div>
+            </div>
+
+            <!-- NAV -->
+            <nav>
+                <button class="nav-btn active" onclick="mudarAba('feed', this)">Feed</button>
+                <button class="nav-btn" onclick="mudarAba('camera', this)">📸 Câmera</button>
+                <button class="nav-btn" onclick="mudarAba('ranking', this)">🏆 Ranking</button>
+                <button class="nav-btn" onclick="mudarAba('chat', this)">💬 Chat</button>
+                <button class="nav-btn" onclick="mudarAba('profile', this)">👤 Perfil</button>
+            </nav>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        let modoRegistro = false;
+        let usuarioLogado = localStorage.getItem('rl_user') || null;
+        let dadosCache = { posts: [], ranking: [], perfis: {}, seguindo: {} };
+        let filtroFeedAtual = 'global';
+        let tempoRestante = 0;
+
+        if (usuarioLogado) entrarNoApp(usuarioLogado);
+
+        function mostrarToast(msg) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerText = msg;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        function alternarModoAuth() {
+            modoRegistro = !modoRegistro;
+            document.getElementById('auth-title').innerText = modoRegistro ? 'Criar Conta' : 'Entrar no Real Life';
+            document.getElementById('auth-btn').innerText = modoRegistro ? 'Cadastrar' : 'Entrar';
+            document.getElementById('switch-text').innerText = modoRegistro ? 'Fazer Login' : 'Cadastre-se';
+        }
+
+        async function executarAuth() {
+            const usuario = document.getElementById('auth-user').value.trim();
+            const senha = document.getElementById('auth-pass').value.trim();
+            if (!usuario || !senha) return alert('Preencha os campos!');
+
+            const rota = modoRegistro ? '/api/registro' : '/api/login';
+            try {
+                const res = await fetch(rota, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ usuario, senha })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    if (modoRegistro) {
+                        alert('Conta criada com sucesso! Faça login.');
+                        alternarModoAuth();
+                    } else {
+                        localStorage.setItem('rl_user', data.usuario);
+                        entrarNoApp(data.usuario);
+                    }
+                } else {
+                    alert(data.erro);
+                }
+            } catch (e) {
+                alert('Erro na conexão com o servidor.');
+            }
+        }
+
+        function entrarNoApp(user) {
+            usuarioLogado = user;
+            document.getElementById('auth-screen').style.display = 'none';
+            document.getElementById('main-app').style.display = 'block';
+            document.getElementById('profile-username').innerText = '@' + user;
+            document.getElementById('profile-initial').innerText = user.charAt(0).toUpperCase();
+            carregarDados();
+        }
+
+        function logout() {
+            localStorage.removeItem('rl_user');
+            location.reload();
+        }
+
+        function mudarAba(aba, el) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('tab-' + aba).classList.add('active');
+            el.classList.add('active');
+
+            if (aba === 'camera') iniciarCamera();
+            if (aba === 'feed' || aba === 'ranking' || aba === 'profile') carregarDados();
+        }
+
+        function mudarCorTema(cor) {
+            document.documentElement.style.setProperty('--primary', cor);
+            fetch('/api/perfil', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ usuario: usuarioLogado, corTema: cor })
+            });
+        }
+
+        let videoStream = null;
+        async function iniciarCamera() {
+            const video = document.getElementById('video');
+            if (videoStream) {
+                videoStream.getTracks().forEach(track => track.stop());
+            }
+
+            try {
+                videoStream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: 'user', width: { ideal: 720 }, height: { ideal: 1280 } }, 
+                    audio: false 
+                });
+                video.srcObject = videoStream;
+            } catch (e) {
+                alert('Não foi possível acessar a câmera. Verifique as permissões do navegador.');
+            }
+        }
+
+        function verificarTempoPostagem() {
+            if (!usuarioLogado || !dadosCache.perfis[usuarioLogado]) return;
+            
+            const ultimoPost = dadosCache.perfis[usuarioLogado].ultimoPost || 0;
+            const agora = Date.now();
+            const intervaloMinimo = 10 * 60 * 1000;
+            const tempoDecorrido = agora - ultimoPost;
+
+            if (tempoDecorrido < intervaloMinimo) {
+                tempoRestante = Math.ceil((intervaloMinimo - tempoDecorrido) / 1000);
+            } else {
+                tempoRestante = 0;
+            }
+        }
+
+        setInterval(() => {
+            if (tempoRestante > 0) {
+                tempoRestante--;
+                let min = Math.floor(tempoRestante / 60);
+                let seg = tempoRestante % 60;
+                const cd = document.getElementById('countdown');
+                if (cd) cd.innerText = `${min}:${seg < 10 ? '0' : ''}${seg}`;
+                
+                const btn = document.getElementById('btn-tirar');
+                if (btn) {
+                    btn.disabled = true;
+                    btn.innerText = 'Aguarde o tempo...';
+                }
+            } else {
+                const tb = document.getElementById('timer-box');
+                if (tb) tb.innerHTML = '🔥 HORA DE POSTAR!';
+                const btn = document.getElementById('btn-tirar');
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerText = 'Tirar Foto & Publicar';
+                }
+            }
+        }, 1000);
+
+        async function tirarFoto() {
+            const legenda = document.getElementById('cam-legenda').value.trim();
+            const video = document.getElementById('video');
+            const canvas = document.getElementById('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            canvas.toBlob(async (blob) => {
+                const formData = new FormData();
+                formData.append('usuario', usuarioLogado);
+                formData.append('legenda', legenda);
+                formData.append('foto', blob, 'foto.jpg');
+
+                const res = await fetch('/posts', { method: 'POST', body: formData });
+                if (res.ok) {
+                    mostrarToast('Foto salva!');
+                    document.getElementById('cam-legenda').value = '';
+                    mudarAba('feed', document.querySelector('.nav-btn'));
+                    carregarDados();
+                }
+            }, 'image/jpeg');
+        }
+
+        function filtrarFeed(tipo, el) {
+            filtroFeedAtual = tipo;
+            document.querySelectorAll('.feed-tab-btn').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+            renderizarFeed();
+        }
+
+        async function carregarDados() {
+            try {
+                const res = await fetch('/dados');
+                dadosCache = await res.json();
+
+                if (dadosCache.perfis[usuarioLogado] && dadosCache.perfis[usuarioLogado].corTema) {
+                    document.documentElement.style.setProperty('--primary', dadosCache.perfis[usuarioLogado].corTema);
+                }
+
+                verificarTempoPostagem();
+                renderizarFeed();
+                renderizarRanking();
+                renderizarMemorias();
+
+                if (dadosCache.perfis[usuarioLogado]) {
+                    const bioEl = document.getElementById('profile-bio');
+                    if (bioEl && !bioEl.value) bioEl.value = dadosCache.perfis[usuarioLogado].bio || '';
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function renderizarFeed() {
+            const feed = document.getElementById('feed-container');
+            feed.innerHTML = '';
+
+            const listaSeguindo = dadosCache.seguindo[usuarioLogado] || [];
+            let postsParaMostrar = dadosCache.posts;
+
+            if (filtroFeedAtual === 'seguindo') {
+                postsParaMostrar = postsParaMostrar.filter(p => listaSeguindo.includes(p.usuario) || p.usuario === usuarioLogado);
+            }
+
+            if (postsParaMostrar.length === 0) {
+                feed.innerHTML = '<p style="text-align: center; color: var(--text-muted); margin-top:20px;">Nenhum post por aqui.</p>';
+                return;
+            }
+
+            postsParaMostrar.forEach(p => {
+                const jaCurtiu = p.curtidas.includes(usuarioLogado);
+                const ehEu = p.usuario === usuarioLogado;
+                const estaSeguindo = listaSeguindo.includes(p.usuario);
+
+                let btnSeguir = '';
+                if (!ehEu) {
+                    btnSeguir = `<button class="btn-seguir ${estaSeguindo ? 'seguindo' : ''}" onclick="alternarSeguir('${p.usuario}')">
+                        ${estaSeguindo ? 'Seguindo' : 'Seguir'}
+                    </button>`;
+                }
+
+                let comentariosHtml = p.comentarios.map(c => `<div class="comment"><strong>@${c.usuario}:</strong> ${c.texto}</div>`).join('');
+
+                feed.innerHTML += `
+                    <div class="post-item">
+                        <div class="post-header">
+                            <div>@${p.usuario} ${btnSeguir}</div>
+                            <span style="font-size:0.75rem; color:var(--text-muted);">${p.criado_em}</span>
+                        </div>
+                        <img src="${p.foto}" class="post-img">
+                        <div class="post-body">
+                            <div style="margin-bottom: 8px;"><strong>@${p.usuario}:</strong> ${p.legenda}</div>
+                            <div class="post-actions">
+                                <button class="action-btn ${jaCurtiu ? 'liked' : ''}" onclick="curtirPost(${p.id})">
+                                    ❤️ ${p.curtidas.length} Curtidas
+                                </button>
+                            </div>
+                            <div class="comments-section">${comentariosHtml}</div>
+                            <div class="comment-input-box">
+                                <input type="text" id="comentario-${p.id}" placeholder="Comentar...">
+                                <button class="main-btn" onclick="comentarPost(${p.id})">Enviar</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function renderizarRanking() {
+            const rank = document.getElementById('ranking-list');
+            rank.innerHTML = '';
+            const listaSeguindo = dadosCache.seguindo[usuarioLogado] || [];
+
+            dadosCache.ranking.forEach((r, index) => {
+                const ehEu = r.usuario === usuarioLogado;
+                const estaSeguindo = listaSeguindo.includes(r.usuario);
+                let btnSeguir = '';
+                if (!ehEu) {
+                    btnSeguir = `<button class="btn-seguir ${estaSeguindo ? 'seguindo' : ''}" onclick="alternarSeguir('${r.usuario}')">
+                        ${estaSeguindo ? 'Seguindo' : 'Seguir'}
+                    </button>`;
+                }
+
+                rank.innerHTML += `
+                    <div class="ranking-item">
+                        <span>#${index + 1} - @${r.usuario} ${btnSeguir}</span>
+                        <span style="color: var(--primary); font-weight: bold;">${r.pontos} pts</span>
+                    </div>
+                `;
+            });
+        }
+
+        function renderizarMemorias() {
+            const container = document.getElementById('memories-container');
+            container.innerHTML = '';
+            const minhasFotos = dadosCache.posts.filter(p => p.usuario === usuarioLogado);
+
+            if (minhasFotos.length === 0) {
+                container.innerHTML = '<p style="font-size:0.8rem; color:var(--text-muted); grid-column: span 3;">Nenhuma memória salva.</p>';
+                return;
+            }
+
+            minhasFotos.forEach(p => {
+                container.innerHTML += `<img src="${p.foto}" class="memory-img">`;
+            });
+        }
+
+        async function alternarSeguir(alvo) {
+            await fetch('/api/seguir', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ usuario: usuarioLogado, alvo })
+            });
+            carregarDados();
+        }
+
+        async function curtirPost(id) {
+            await fetch(`/posts/${id}/curtir`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ usuario: usuarioLogado })
+            });
+        }
+
+        async function comentarPost(id) {
+            const input = document.getElementById(`comentario-${id}`);
+            const texto = input.value.trim();
+            if (!texto) return;
+
+            await fetch(`/posts/${id}/comentar`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ usuario: usuarioLogado, texto })
+            });
+            input.value = '';
+        }
+
+        async function salvarPerfil() {
+            const bio = document.getElementById('profile-bio').value;
+            await fetch('/api/perfil', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ usuario: usuarioLogado, bio })
+            });
+            mostrarToast('Perfil salvo!');
+        }
+
+        function enviarMensagem() {
+            const texto = document.getElementById('chat-text').value.trim();
+            if (!texto) return;
+            socket.emit('enviar-mensagem', { usuario: usuarioLogado, mensagem: texto });
+            document.getElementById('chat-text').value = '';
+        }
+
+        socket.on('receber-mensagem', (data) => {
+            const box = document.getElementById('chat-messages');
+            box.innerHTML += `<div class="chat-msg"><strong>@${data.usuario}:</strong> ${data.mensagem}</div>`;
+            box.scrollTop = box.scrollHeight;
+        });
+
+        socket.on('notificacao', (data) => {
+            if (data.usuarioDestino === usuarioLogado) mostrarToast(data.msg);
+        });
+
+        socket.on('atualizar-posts', () => carregarDados());
+        socket.on('atualizar-dados', () => carregarDados());
+        socket.on('novo-post', (p) => {
+            carregarDados();
+            if (p.usuario !== usuarioLogado) mostrarToast(`@${p.usuario} postou no Real Life! 📸`);
+        });
+    </script>
+</body>
+</html>
