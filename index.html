@@ -4,37 +4,38 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Real Life</title>
-    <!-- Tailwind CSS para estilização rápida e moderna -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Socket.io do cliente -->
     <script src="/socket.io/socket.io.js"></script>
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col items-center">
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col items-center">
 
-    <!-- Cabeçalho -->
-    <header class="w-full bg-white shadow p-4 flex justify-between items-center max-w-xl">
-        <h1 class="text-xl font-bold text-indigo-600">Real Life 🌍</h1>
-        <div id="timer" class="text-sm font-semibold bg-indigo-50 text-indigo-600 px-3 py-1 rounded-full">
-            00:00:00
+    <!-- Cabeçalho Bonito e Moderno -->
+    <header class="w-full bg-slate-800 border-b border-slate-700 p-4 flex justify-between items-center max-w-xl shadow-lg sticky top-0 z-50">
+        <h1 class="text-xl font-extrabold bg-gradient-to-r from-indigo-400 to-pink-500 bg-clip-text text-transparent">Real Life 🌍</h1>
+        <div class="flex items-center gap-2">
+            <span class="text-xs text-slate-400">Próximo post em:</span>
+            <div id="timer" class="text-sm font-mono font-bold bg-indigo-600/30 border border-indigo-500/50 text-indigo-300 px-3 py-1 rounded-full">
+                10:00
+            </div>
         </div>
     </header>
 
     <!-- Conteúdo Principal -->
-    <main class="w-full max-w-xl p-4 flex flex-col gap-4">
+    <main class="w-full max-w-xl p-4 flex flex-col gap-4 mb-10">
 
         <!-- Caixa de Pesquisa de Usuários para Seguir -->
-        <div class="bg-white p-4 rounded-xl shadow-md">
-            <input type="text" id="pesquisa-usuarios" placeholder="🔍 Pesquisar usuários para seguir..." class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        <div class="bg-slate-800 border border-slate-700 p-4 rounded-2xl shadow-md">
+            <input type="text" id="pesquisa-usuarios" placeholder="🔍 Pesquisar usuários para seguir..." class="w-full p-3 bg-slate-900 border border-slate-700 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
             <div id="lista-resultados-busca" class="mt-2 flex flex-col gap-1"></div>
         </div>
 
         <!-- Formulário de Postagem -->
-        <div class="bg-white p-4 rounded-xl shadow-md">
-            <h2 class="font-semibold text-gray-700 mb-2">Criar Post</h2>
+        <div class="bg-slate-800 border border-slate-700 p-4 rounded-2xl shadow-md">
+            <h2 class="font-semibold text-slate-200 mb-3 text-sm tracking-wide uppercase">Criar Momento</h2>
             <form id="form-post" onsubmit="enviarPost(event)" class="flex flex-col gap-3">
-                <input type="file" id="imagem-input" accept="image/*" required class="text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
-                <input type="text" id="legenda-input" placeholder="Escreva uma legenda..." class="p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                <button type="submit" class="bg-indigo-600 text-white py-2 rounded-lg font-semibold hover:bg-indigo-700 transition">Postar</button>
+                <input type="file" id="imagem-input" accept="image/*" required class="text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500 cursor-pointer">
+                <input type="text" id="legenda-input" placeholder="O que está acontecendo agora?" class="p-3 bg-slate-900 border border-slate-700 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                <button type="submit" class="bg-gradient-to-r from-indigo-600 to-violet-600 text-white py-2.5 rounded-xl font-bold shadow-lg hover:opacity-90 transition">Publicar</button>
             </form>
         </div>
 
@@ -45,31 +46,38 @@
 
     </main>
 
-    <!-- Script de Integração -->
+    <!-- Script com Temporizador de 10 Minutos e Conexões -->
     <script>
         const socket = io();
         let usuarioLogado = localStorage.getItem('usuarioLogado') || prompt('Digite seu nome de usuário:') || 'Convidado';
         localStorage.setItem('usuarioLogado', usuarioLogado);
 
-        // --- TEMPORIZADOR ---
+        // --- TEMPORIZADOR DE 10 MINUTOS ---
         function iniciarTemporizador() {
             const elementoTimer = document.getElementById('timer');
             if (!elementoTimer) return;
 
-            function atualizar() {
-                const agora = new Date();
-                const proximo = new Date();
-                proximo.setHours(24, 0, 0, 0);
-                const diff = proximo - agora;
+            // Define 10 minutos em segundos (10 * 60 = 600 segundos)
+            let tempoRestante = 600; 
 
-                const horas = Math.floor((diff / (1000 * 60 * 60)) % 24);
-                const minutos = Math.floor((diff / 1000 / 60) % 60);
-                const segundos = Math.floor((diff / 1000) % 60);
-
-                elementoTimer.innerText = `${horas.toString().padStart(2, '0')}:${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`;
+            // Tenta pegar o tempo salvo ou inicia do zero
+            const salvo = localStorage.getItem('tempo_real_life');
+            if (salvo) {
+                const diff = Math.floor((Date.now() - Number(salvo)) / 1000);
+                tempoRestante = Math.max(0, 600 - (diff % 600));
+            } else {
+                localStorage.setItem('tempo_real_life', Date.now());
             }
-            setInterval(atualizar, 1000);
-            atualizar();
+
+            setInterval(() => {
+                tempoRestante--;
+                if (tempoRestante < 0) tempoRestante = 600; // Reinicia o ciclo de 10 min
+
+                const minutos = Math.floor(tempoRestante / 60);
+                const segundos = tempoRestante % 60;
+
+                elementoTimer.innerText = `${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`;
+            }, 1000);
         }
 
         // --- CARREGAR DADOS ---
@@ -91,23 +99,23 @@
             feed.innerHTML = '';
 
             if (!posts || posts.length === 0) {
-                feed.innerHTML = '<p class="text-center text-gray-400 py-4">Nenhum post no feed ainda.</p>';
+                feed.innerHTML = '<p class="text-center text-slate-500 py-6 text-sm">Nenhum post no feed ainda.</p>';
                 return;
             }
 
             posts.forEach(post => {
                 const div = document.createElement('div');
-                div.className = 'bg-white rounded-xl shadow-md p-4';
+                div.className = 'bg-slate-800 border border-slate-700 rounded-2xl shadow-md p-4 overflow-hidden';
                 div.innerHTML = `
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="font-bold text-indigo-600">@${post.usuario}</span>
-                        <span class="text-xs text-gray-400">${post.data}</span>
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="font-bold text-indigo-400 text-sm">@${post.usuario}</span>
+                        <span class="text-xs text-slate-500">${post.data}</span>
                     </div>
-                    <img src="${post.imagem}" class="rounded-lg w-full object-cover max-h-96 mb-3" />
-                    <p class="text-gray-700 mb-2">${post.legenda}</p>
-                    <div class="flex items-center gap-4 text-sm text-gray-500">
-                        <button onclick="curtirPost(${post.id})" class="flex items-center gap-1 hover:text-red-500 transition">
-                            ❤️ <span>${post.curtidas ? post.curtidas.length : 0}</span>
+                    <img src="${post.imagem}" class="rounded-xl w-full object-cover max-h-96 mb-3 border border-slate-700" />
+                    <p class="text-slate-300 text-sm mb-3">${post.legenda}</p>
+                    <div class="flex items-center gap-4 text-sm text-slate-400 border-t border-slate-700/50 pt-3">
+                        <button onclick="curtirPost(${post.id})" class="flex items-center gap-1.5 hover:text-red-400 transition">
+                            ❤️ <span class="font-semibold">${post.curtidas ? post.curtidas.length : 0}</span>
                         </button>
                     </div>
                 `;
@@ -160,10 +168,10 @@
 
                 encontrados.forEach(usuario => {
                     const item = document.createElement('div');
-                    item.className = 'flex justify-between items-center p-2 hover:bg-gray-50 rounded border-b';
+                    item.className = 'flex justify-between items-center p-2.5 bg-slate-900/50 hover:bg-slate-900 rounded-xl border border-slate-700/50 mt-1';
                     item.innerHTML = `
-                        <span class="font-semibold text-sm">@${usuario}</span>
-                        <button onclick="seguirUsuario('${usuario}')" class="bg-indigo-600 text-white px-3 py-1 rounded text-xs hover:bg-indigo-700">Seguir</button>
+                        <span class="font-semibold text-xs text-slate-200">@${usuario}</span>
+                        <button onclick="seguirUsuario('${usuario}')" class="bg-indigo-600 text-white px-3 py-1 rounded-lg text-xs font-bold hover:bg-indigo-500 transition">Seguir</button>
                     `;
                     listaResultados.appendChild(item);
                 });
@@ -188,7 +196,6 @@
             carregarDados();
         }
 
-        // Socket.io tempo real
         socket.on('novo-post', () => carregarDados());
         socket.on('atualizar-posts', () => carregarDados());
 
@@ -199,33 +206,7 @@
     </script>
 </body>
 </html>
-: 1px solid var(--border); }
-
-        .theme-selector { display: flex; gap: 10px; justify-content: center; margin: 15px 0; }
-        .theme-btn { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #fff; cursor: pointer; }
-    </style>
-</head>
-<body>
-
-    <div id="toast-container"></div>
-
-    <div class="container">
-        <header>
-            <h1>Real Life</h1>
-        </header>
-
-        <!-- LOGIN -->
-        <div id="auth-screen">
-            <div class="auth-card">
-                <h2 id="auth-title" style="margin-bottom: 15px; text-align: center;">Entrar no Real Life</h2>
-                <input type="text" id="auth-user" placeholder="Seu usuário">
-                <input type="password" id="auth-pass" placeholder="Sua senha">
-                <button class="main-btn" onclick="executarAuth()" id="auth-btn">Entrar</button>
-                <div class="auth-switch" onclick="alternarModoAuth()">
-                    Não tem conta? <span id="switch-text">Cadastre-se</span>
-                </div>
-            </div>
-        </div>
+div>
 
         <!-- MAIN APP -->
         <div id="main-app">
