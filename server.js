@@ -102,29 +102,24 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-app.get('/dados', (req, res) => {
+// Criar Post
+app.post('/posts', upload.single('imagem'), (req, res) => {
+    const { usuario, legenda } = req.body;
+    if (!req.file) return res.status(400).json({ erro: 'Nenhuma imagem enviada.' });
+
     const db = lerDados();
-    const ranking = Object.entries(db.usuarios || {})
-        .map(([usuario, pontos]) => ({ usuario, pontos }))
-        .sort((a, b) => b.pontos - a.pontos);
+    const novoPost = {
+        id: Date.now(),
+        usuario,
+        imagem: `/uploads/${req.file.filename}`,
+        legenda: legenda || '',
+        curtidas: [],
+        comentarios: [],
+        data: new Date().toLocaleDateString('pt-BR')
+    };
 
-    res.json({
-        posts: [...db.posts].reverse(),
-        ranking,
-        perfis: db.perfis,
-        seguindo: db.seguindo
-    });
-});
-
-
-
-server.listen(PORT, '0.0.0.0', () => {
-    console.log("Servidor rodando na porta " + PORT);
-});
-
-idor rodando na porta ${3000}`);
-});
-io] = (db.usuarios[usuario] || 0) + 10;
+    db.posts.push(novoPost);
+    db.usuarios[usuario] = (db.usuarios[usuario] || 0) + 10;
     salvarDados(db);
 
     io.emit('novo-post', novoPost);
@@ -212,5 +207,5 @@ io.on('connection', (socket) => {
 server.listen(PORT, '0.0.0.0', () => {
     console.log(`Real Life v2.0 rodando na porta ${PORT}`);
 });
- v2.0 rodando na porta ${PORT}`);
+
 });
