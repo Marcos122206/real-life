@@ -122,7 +122,7 @@ server.listen(PORT, '0.0.0.0', () => {
     console.log("Servidor rodando na porta " + PORT);
 });
 
-idor rodando na porta ${PORT}`);
+idor rodando na porta ${3000}`);
 });
 io] = (db.usuarios[usuario] || 0) + 10;
     salvarDados(db);
